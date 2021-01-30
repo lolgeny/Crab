@@ -9,17 +9,17 @@ mod eval;
 use std::env::args;
 use std::fs::read_to_string;
 use std::io::{stdin, Read};
+use crate::eval::Value;
 
 fn main() {
     if args().len() != 2 {
         panic!("Expected usage: 'crab <file.crab>'")
     }
     let program = read_to_string(args().nth(1).unwrap()).expect("Could not read file");
+    let tokens = lex::lex(&mut program.chars().peekable(), false);
     let mut input = String::new();
     stdin().read_to_string(&mut input).expect("Could not read input");
-    let mut input = input.split(' ').map(str::parse).map(Result::unwrap);
-    let tokens = lex::lex(&mut program.chars().peekable(), false, &mut input);
-    let mut stack = vec![];
+    let mut stack = input.split(' ').map(|s|Value::Number(s.parse().unwrap())).collect();
     eval::eval(tokens, &mut stack);
     println!("Stack trace:");
     println!("{:?}", stack);

@@ -1,7 +1,7 @@
 #[derive(Clone, Debug)]
 pub enum Token {
     Number(f64),
-    Plus, Minus, Times, Divide, Greater, Less, Eq, Neq,
+    Plus, Minus, Times, Divide, Modulus, Divides, Floor, Ceil, Greater, Less, Eq, Neq,
     Natural, NaturalTo, Range, Take, Length, Fold(Vec<Token>, bool), Filter(Vec<Token>), Map(Vec<Token>),
     Pop, Duplicate,
     Print
@@ -11,7 +11,7 @@ use std::iter::Peekable;
 
 const HEX: [char; 16] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
 
-pub fn lex(it: &mut Peekable<impl Iterator<Item=char>>, block: bool, stdin: &mut impl Iterator<Item=f64>) -> Vec<Token> {
+pub fn lex(it: &mut Peekable<impl Iterator<Item=char>>, block: bool) -> Vec<Token> {
     let mut tokens = vec![];
     while let Some(next) = it.next() {
         tokens.push(match next {
@@ -19,6 +19,10 @@ pub fn lex(it: &mut Peekable<impl Iterator<Item=char>>, block: bool, stdin: &mut
             '-' => Minus,
             '*' => Times,
             '/' => Divide,
+            '%' => Modulus,
+            '_' => Divides,
+            '[' => Floor,
+            ']' => Ceil,
             '>' => Greater,
             '<' => Less,
             '=' => Eq,
@@ -29,17 +33,16 @@ pub fn lex(it: &mut Peekable<impl Iterator<Item=char>>, block: bool, stdin: &mut
             't' => Take,
             ',' => Length,
             's' => Fold(vec![Plus], true),
-            'f' => Fold(lex(&mut it.next().into_iter().peekable(), false, stdin), true),
-            'F' => Fold(lex(&mut it.next().into_iter().peekable(), false, stdin), false),
-            '\\' => Fold(lex(it, true, stdin), false),
-            '|' => Fold(lex(it, true, stdin), true),
-            '#' => Filter(lex(it, true, stdin)),
-            'm' => Map(lex(&mut it.next().into_iter().peekable(), false, stdin)),
-            '%' => Map(lex(it, true, stdin)),
+            'f' => Fold(lex(&mut it.next().into_iter().peekable(), false), true),
+            'F' => Fold(lex(&mut it.next().into_iter().peekable(), false), false),
+            '\\' => Fold(lex(it, true), false),
+            '|' => Fold(lex(it, true), true),
+            '#' => Filter(lex(it, true)),
+            'm' => Map(lex(&mut it.next().into_iter().peekable(), false)),
+            'M' => Map(lex(it, true)),
             ';' => Pop,
             '$' => Duplicate,
             'p' => Print,
-            'r' => Number(stdin.next().unwrap()),
             '}' => if block {
                 return tokens
             } else {

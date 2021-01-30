@@ -41,6 +41,10 @@ pub (crate) fn eval(input: Vec<Token>, stack: &mut Stack) {
             Plus => plus(stack),
             Minus => minus(stack),
             Times => times(stack),
+            Modulus => modulus(stack),
+            Divides => divides(stack),
+            Floor => floor(stack),
+            Ceil => ceil(stack),
             Greater => greater(stack),
             Less => less(stack),
             Eq => eq(stack),
@@ -100,6 +104,22 @@ fn times(stack: &mut Stack) {
 }
 fn divide(stack: &mut Stack) {
     let n = pop_number(stack) / pop_number(stack);
+    stack.push(Number(n));
+}
+fn modulus(stack: &mut Stack) {
+    let n = pop_number(stack) % pop_number(stack);
+    stack.push(Number(n));
+}
+fn divides(stack: &mut Stack) {
+    let n = pop_number(stack) % pop_number(stack);
+    stack.push(Number((n == 0f64) as u8 as f64));
+}
+fn floor(stack: &mut Stack) {
+    let n = pop_number(stack).floor();
+    stack.push(Number(n));
+}
+fn ceil(stack: &mut Stack) {
+    let n = pop_number(stack).ceil();
     stack.push(Number(n));
 }
 fn greater(stack: &mut Stack) {
